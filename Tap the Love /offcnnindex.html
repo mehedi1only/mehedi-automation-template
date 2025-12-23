@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tap the Love</title>
+
+  <!-- Cute + Rounded Romantic Fonts -->
+  <!-- Elegant + Cute Handwritten Font -->
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600&family=Patrick+Hand&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#07090d;
+      --card:#0b0f16;
+      --border:#ffffff;
+      --text:#ffffff;
+      --muted:#cfcfd6;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+
+    html,body{
+      height:100%;width:100%;
+      font-family:'Quicksand',system-ui,-apple-system;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.05), transparent 45%),
+        radial-gradient(circle at 80% 40%, rgba(255,255,255,0.04), transparent 50%),
+        var(--bg);
+      color:var(--text);
+      overflow:hidden
+    }
+
+    .screen{
+      position:absolute;inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      padding:22px;
+      text-align:center
+    }
+    .screen.active{display:flex;animation:fade .6s ease both}
+    @keyframes fade{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
+
+    /* LOVE button */
+    .love-btn{
+      width:120px;height:120px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      border:2px solid rgba(255,255,255,0.9);
+      background:rgba(255,255,255,0.05);
+      box-shadow:0 0 40px rgba(255,255,255,0.35);
+      animation:pulse 2s infinite
+    }
+    @keyframes pulse{
+      0%{box-shadow:0 0 10px rgba(255,255,255,0.25)}
+      50%{box-shadow:0 0 40px rgba(255,255,255,0.55)}
+      100%{box-shadow:0 0 10px rgba(255,255,255,0.25)}
+    }
+    .love-btn img{width:80%;height:80%;object-fit:contain}
+
+    .tap-text{margin-top:14px;font-size:16px;color:var(--muted)}
+
+    /* avatar */
+    .avatar{
+      width:96px;height:96px;border-radius:50%;
+      border:3px solid #fff;
+      background:#111;
+      overflow:hidden;
+      margin-bottom:16px
+    }
+    .avatar img{width:100%;height:100%;object-fit:cover}
+
+    /* card like screenshot */
+    .card{
+      background:var(--card);
+      border:3px solid #fff;
+      border-radius:28px;
+      padding:22px 20px;
+      max-width:360px;width:100%;
+      box-shadow:0 0 0 2px rgba(255,255,255,0.1)
+    }
+
+    .typing{
+      font-family:'Patrick Hand','Quicksand',cursive;
+      font-size:21px;
+      line-height:1.7;
+      letter-spacing:.4px;
+      white-space:pre-wrap;
+      border:none;
+      padding:0
+    }
+
+    #greet{
+      font-family:'Patrick Hand',cursive;
+      font-size:24px;
+      margin-bottom:10px
+    }
+
+    .hearts{display:flex;gap:14px;justify-content:center;margin-top:16px}
+    .heart{font-size:30px;opacity:.6;cursor:pointer}
+    .heart.active{opacity:1;transform:scale(1.3)}
+
+    /* floating outlined hearts */
+    .bg-circles span{
+      position:absolute;
+      font-size:22px;
+      opacity:.25;
+      animation:float 20s linear infinite
+    }
+    .bg-circles span::after{content:'♡'}
+    @keyframes float{from{transform:translateY(120vh)}to{transform:translateY(-200px)}}
+
+    .heart-rain span{position:absolute;top:-5%;font-size:22px;opacity:.7;animation:fall linear infinite}
+    @keyframes fall{to{transform:translateY(120vh);opacity:0}}
+
+    .bg-circles,.heart-rain{pointer-events:none}
+
+    @media(max-width:420px){
+      .typing{font-size:18px}
+      .card{border-radius:24px}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-circles" aria-hidden="true">
+    <span style="left:8%; animation-duration:22s"></span>
+    <span style="left:42%; animation-duration:26s"></span>
+    <span style="left:72%; animation-duration:20s"></span>
+  </div>
+
+  <audio id="music" loop>
+    <source src="music.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="screen active" id="s1">
+    <div class="love-btn" id="startLove">
+      <img src="/assets/love4.gif">
+    </div>
+    <div class="tap-text">Tap the LOVE 💛</div>
+  </div>
+
+  <div class="screen" id="s2">
+    <div class="avatar"><img src="/assets/love3.gif" alt="avatar"></div>
+    <h3><span id="greet" class="typing"></span></h3>
+    <div class="card" style="margin-top:16px">
+      <div style="font-size:14px;color:var(--muted);margin-bottom:10px">Tap all 4 hearts 🤍</div>
+      <div class="hearts">
+        <div class="heart">🤍</div>
+        <div class="heart">🤍</div>
+        <div class="heart">🤍</div>
+        <div class="heart">🤍</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="s3">
+    <div class="avatar"><img src="/assets/love2.gif" alt="avatar"></div>
+    <div class="card"><p class="typing" id="storyLine"></p></div>
+  </div>
+
+  <div class="screen" id="s4">
+    <div class="avatar"><img src="/assets/love1.gif" alt="avatar"></div>
+    <div class="card"><p class="typing" id="finalLine"></p></div>
+    <div class="heart-rain"></div>
+  </div>
+
+  <script>
+  const params = new URLSearchParams(window.location.search);
+let USER_NAME = params.get("name") || "Someone Special";
+USER_NAME = USER_NAME.slice(0, 24);
+
+  
+    
+    const music = document.getElementById('music');
+
+    const screens = id => document.getElementById(id);
+    const show = id => {
+      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+      screens(id).classList.add('active');
+    };
+
+    function typeText(el,text,speed=45){
+      el.textContent=''; let i=0;
+      return new Promise(res=>{
+        const t=setInterval(()=>{
+          el.textContent+=text.charAt(i++);
+          if(i>=text.length){clearInterval(t);setTimeout(res,350)}
+        },speed);
+      });
+    }
+
+    document.getElementById('startLove').onclick = async ()=>{
+  music.play().catch(()=>{});
+  show('s2');
+  await typeText(
+    document.getElementById('greet'),
+    `Hi, ${USER_NAME} ✨`,
+    42
+  );
+};
+
+
+    let clicked=0;
+    document.querySelectorAll('.heart').forEach(h=>{
+      h.onclick=()=>{
+        if(!h.classList.contains('active')){
+          h.classList.add('active');clicked++;
+          if(clicked===4) runStoryFlow();
+        }
+      };
+    });
+
+    async function runStoryFlow(){
+      show('s3');
+      const el=document.getElementById('storyLine');
+      const story=[
+        'I wanted to tell you something…',
+        'But words get shy when it’s about you 🫶',
+        'So I made this little moment…',
+        'Just to say one thing 💛'
+      ];
+      for(const line of story){
+        await typeText(el,line,38+Math.random()*22);
+        await new Promise(r=>setTimeout(r,900));
+        el.textContent='';
+      }
+      show('s4');
+      heartRain();
+      finalTyping();
+    }
+
+    function heartRain(){
+      const wrap=document.querySelector('.heart-rain');wrap.innerHTML='';
+      for(let i=0;i<28;i++){
+        const s=document.createElement('span');
+        s.textContent=['♡','❤','💛','💜'][Math.floor(Math.random()*4)];
+        s.style.left=Math.random()*100+'%';
+        s.style.animationDuration=(3+Math.random()*4)+'s';
+        wrap.appendChild(s);
+      }
+    }
+
+    async function finalTyping(){
+      const el=document.getElementById('finalLine');
+      const lines=[
+        'Very beautiful, in fact 🥹✨',
+        'Aaaaakkk =͟͟͞♡',
+        'I love you so muchhh 💐💛'
+      ];
+      for(let i=0;i<lines.length;i++){
+        await typeText(el,lines[i],34+Math.random()*18);
+        if(i!==lines.length-1){await new Promise(r=>setTimeout(r,800));el.textContent='';}
+      }
+    }
+  </script>
+</body>
+</html>
