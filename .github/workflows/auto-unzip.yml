@@ -29,9 +29,9 @@ jobs:
           done
 
       - name: Commit extracted files
-  run: |
-    git config --global user.name "Amio Achi • Mehedi"
-    git config --global user.email "mehedi1only@users.noreply.github.com"
-    git add .
-    git commit -m "Auto unzip ZIP files (by Mehedi)" || echo "Nothing to commit"
-    git push
+        run: |
+          git config --global user.name "Amio Achi • Mehedi"
+          git config --global user.email "mehedi1only@users.noreply.github.com"
+          git add .
+          git commit -m "Auto unzip ZIP files (by Mehedi)" || echo "Nothing to commit"
+          git push
